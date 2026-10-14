@@ -7307,7 +7307,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.electronAPI && window.electronAPI.onWelcomeResult) window.electronAPI.onWelcomeResult((d) => applyWelcomeResult(d));
 
   function checkCompactLayout() {
-    const isMini = window.innerWidth <= 520;
+    // A narrow browser is a phone layout; only Electron has a mini window.
+    const isMini = !!window.electronAPI && window.innerWidth <= 520;
     document.body.classList.toggle('mini', isMini);
   }
   window.addEventListener('resize', checkCompactLayout);
