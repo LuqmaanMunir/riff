@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function ownsLibrary(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    match /users/{uid} {
+      allow read: if ownsLibrary(uid);
+      allow create, update: if ownsLibrary(uid)
+        && request.resource.data.keys().hasOnly(['libraryVersion'])
+        && request.resource.data.libraryVersion == 1;
+      match /{kind}/{item} {
+        allow read, delete: if ownsLibrary(uid)
+          && kind in ['favorites', 'history', 'playlists'];
+        allow create, update: if ownsLibrary(uid)
+          && kind in ['favorites', 'history', 'playlists']
+          && request.resource.data.keys().hasOnly(['key', 'data', 'order', 'title', 'artist', 'platform', 'updatedAt'])
+          && request.resource.data.key is string
+          && request.resource.data.data is string
+          && request.resource.data.order is int
+          && request.resource.data.order >= 0
+          && request.resource.data.title is string
+          && request.resource.data.artist is string
+          && request.resource.data.platform is string
+          && request.resource.data.updatedAt == request.time;
+      }
+    }
+  }
+}

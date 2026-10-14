@@ -45,6 +45,7 @@
       </div>
       <span class="mobile-view-title" id="mobile-view-title">Discover</span>
     </div>
+    <button type="button" class="cloud-account-button" id="btn-cloud-account" aria-haspopup="dialog" aria-controls="cloud-account">Sign in</button>
     <div class="titlebar-controls">
       <button class="titlebar-btn" id="btn-mini-player" title="Compact mini player">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="11" y="11" width="8" height="8" rx="1"/></svg>
@@ -2319,6 +2320,17 @@
     <div id="css-editor-host" class="css-editor-host"></div>
   </div>
 
+  <dialog class="cloud-account-dialog" id="cloud-account" aria-labelledby="cloud-account-title">
+    <div class="cloud-account-header"><h2 id="cloud-account-title">Your music</h2><button type="button" id="btn-cloud-close" aria-label="Close account">Close</button></div>
+    <p id="cloud-identity">Your music library</p>
+    <p id="cloud-status" role="status" aria-live="polite">Connecting to Firebase…</p>
+    <button type="button" id="btn-google-sign-in" disabled>Sign in with Google</button>
+    <button type="button" id="btn-cloud-sign-out" hidden>Sign out</button>
+    <button type="button" id="btn-cloud-retry" hidden>Retry sync</button>
+  </dialog>
+  <script src="music-store.js"></script>
+  <script src="firebase.js"></script>
+  <script src="cloud-library.js"></script>
   <script src="assets/hls.min.js"></script>
   <script src="audio-engine.js"></script>
   <script src="app.js"></script>

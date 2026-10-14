@@ -346,6 +346,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
   }
 
+
+  function persistMusicValue(key, value) {
+    localStorage.setItem(key, value);
+    window.dispatchEvent(new CustomEvent('riff-library-change', {detail: {kind: key.replace('devsize_', ''), items: JSON.parse(value)}}));
+  }
+
   const savedSound = loadSoundSettings();
 
   const state = {
@@ -1657,8 +1663,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return updated;
       };
 
-      if (updateArr(state.history)) localStorage.setItem('devsize_history', JSON.stringify(state.history));
-      if (updateArr(state.favorites)) localStorage.setItem('devsize_favorites', JSON.stringify(state.favorites));
+      if (updateArr(state.history)) persistMusicValue('devsize_history', JSON.stringify(state.history));
+      if (updateArr(state.favorites)) persistMusicValue('devsize_favorites', JSON.stringify(state.favorites));
       if (updateArr(state.queue)) renderQueueView();
 
       sendStateToServer();
@@ -2406,7 +2412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     state.history = state.history.filter(t => !isSameTrack(t, track));
     state.history.unshift(track);
     if (state.history.length > 100) state.history.pop();
-    localStorage.setItem('devsize_history', JSON.stringify(state.history));
+    persistMusicValue('devsize_history', JSON.stringify(state.history));
     if (state.currentView === 'history') renderHistoryView();
 
     updateNowPlayingUI(track);
@@ -4149,7 +4155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       state.favorites.unshift(track);
     }
     
-    localStorage.setItem('devsize_favorites', JSON.stringify(state.favorites));
+    persistMusicValue('devsize_favorites', JSON.stringify(state.favorites));
     updateFavoritesBadge();
     updateFavoriteIcon();
     if (state.currentView === 'favorites') renderFavoritesView();
@@ -4619,7 +4625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setOrder: (fromIdx, toIdx) => {
       const [moved] = state.playlists.splice(fromIdx, 1);
       state.playlists.splice(toIdx, 0, moved);
-      localStorage.setItem('devsize_playlists', JSON.stringify(state.playlists));
+      persistMusicValue('devsize_playlists', JSON.stringify(state.playlists));
     }
   });
 
@@ -4641,7 +4647,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setOrder: (fromIdx, toIdx) => {
       const [moved] = state.favorites.splice(fromIdx, 1);
       state.favorites.splice(toIdx, 0, moved);
-      localStorage.setItem('devsize_favorites', JSON.stringify(state.favorites));
+      persistMusicValue('devsize_favorites', JSON.stringify(state.favorites));
       if (el.favoritesSubtitle) {
         el.favoritesSubtitle.textContent = `${state.favorites.length} tracks saved`;
       }
@@ -4657,7 +4663,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!pl || !pl.tracks) return;
       const [moved] = pl.tracks.splice(fromIdx, 1);
       pl.tracks.splice(toIdx, 0, moved);
-      localStorage.setItem('devsize_playlists', JSON.stringify(state.playlists));
+      persistMusicValue('devsize_playlists', JSON.stringify(state.playlists));
     }
   });
 
@@ -4665,7 +4671,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!name || !name.trim()) return;
     const newPl = { id: 'pl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), name: name.trim(), tracks: Array.isArray(initialTracks) ? initialTracks : [] };
     state.playlists.push(newPl);
-    localStorage.setItem('devsize_playlists', JSON.stringify(state.playlists));
+    persistMusicValue('devsize_playlists', JSON.stringify(state.playlists));
     renderPlaylistsList();
     openPlaylistDetail(newPl.id);
   }
@@ -4708,14 +4714,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pl = state.playlists.find(p => p.id === state.currentPlaylistId);
     if (!pl) return;
     pl.tracks = pl.tracks.filter(t => t.id !== trackId);
-    localStorage.setItem('devsize_playlists', JSON.stringify(state.playlists));
+    persistMusicValue('devsize_playlists', JSON.stringify(state.playlists));
     openPlaylistDetail(state.currentPlaylistId);
   }
 
   function deleteCurrentPlaylist() {
     if (!state.currentPlaylistId) return;
     state.playlists = state.playlists.filter(p => p.id !== state.currentPlaylistId);
-    localStorage.setItem('devsize_playlists', JSON.stringify(state.playlists));
+    persistMusicValue('devsize_playlists', JSON.stringify(state.playlists));
     state.currentPlaylistId = null;
     renderPlaylistsList();
     switchView('discover');
@@ -4838,7 +4844,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (track) {
             if (!pl.tracks.some(t => t.id === track.id)) {
               pl.tracks.push(track);
-              localStorage.setItem('devsize_playlists', JSON.stringify(state.playlists));
+              persistMusicValue('devsize_playlists', JSON.stringify(state.playlists));
               renderPlaylistsList();
               showToast(`Added to "${pl.name}"`, 'success');
             } else {
@@ -5472,7 +5478,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (el.btnClearHistory) {
     el.btnClearHistory.addEventListener('click', () => {
       state.history = [];
-      localStorage.setItem('devsize_history', '[]');
+      persistMusicValue('devsize_history', '[]');
       renderHistoryView();
     });
   }
@@ -8067,7 +8073,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
         if (addedFav) {
-          localStorage.setItem('devsize_favorites', JSON.stringify(state.favorites));
+          persistMusicValue('devsize_favorites', JSON.stringify(state.favorites));
           updateFavoritesBadge();
           updateFavoriteIcon();
           if (state.currentView === 'favorites') renderFavoritesView();
@@ -8266,7 +8272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const existingIds = new Set(pl.tracks.map(t => t.id));
           const newTracks = foundTracks.filter(t => !existingIds.has(t.id));
           pl.tracks.push(...newTracks);
-          localStorage.setItem('devsize_playlists', JSON.stringify(state.playlists));
+          persistMusicValue('devsize_playlists', JSON.stringify(state.playlists));
           renderPlaylistsList();
         }
       }
@@ -10243,6 +10249,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }).catch(() => {});
   }
+  window.riffLibrary = {
+    read() { return JSON.parse(JSON.stringify({favorites: state.favorites, history: state.history, playlists: state.playlists})); },
+    replace(kind, items) {
+      if (!['favorites', 'history', 'playlists'].includes(kind) || !Array.isArray(items)) return;
+      state[kind] = items;
+      localStorage.setItem('devsize_' + kind, JSON.stringify(items));
+      if (kind === 'favorites') {
+        if (el.favoritesCount) el.favoritesCount.textContent = items.length;
+        renderFavoritesView();
+      }
+      if (kind === 'history') renderHistoryView();
+      if (kind === 'playlists') {
+        renderPlaylistsList();
+        if (state.currentView === 'playlist-detail') {
+          if (items.some(item => item.id === state.currentPlaylistId)) openPlaylistDetail(state.currentPlaylistId);
+          else switchView('discover');
+        }
+      }
+    }
+  };
+  window.dispatchEvent(new Event('riff-library-ready'));
+
 });
 
 document.addEventListener('DOMContentLoaded', () => {
